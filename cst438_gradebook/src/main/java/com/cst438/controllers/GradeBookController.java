@@ -4,7 +4,6 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.amqp.AmqpResourceNotAvailableException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -182,21 +181,22 @@ public class GradeBookController {
 	public void updateAssignmentName( @PathVariable int assignment_id, @RequestParam String name){
 
 		String email = "dwisneski@csumb.edu";//hard code admin email
-		if(email.equals("dwisneski@csumb.edu")){
 
-			Assignment a = checkAssignment(assignment_id,email);
-			a.setName(name);
-			assignmentRepository.save(a);
-		}
+		Assignment a = checkAssignment(assignment_id,email);
+		a.setName(name);
+		assignmentRepository.save(a);
 	}
 
 	//As an instructor, I can delete an assignment  for my course (only if there are no grades for the assignment).
 
-@DeleteMapping("/assingment/{id}")
+@DeleteMapping("/assignment/{assignmentId}")
 @Transactional
-public void deleteAssignment(@PathVariable("id") int assignment_id){
-		Assignment a = assignmentRepository.findAssignmentById(assignment_id);
-		assignmentRepository.deleteAssignment(assignment_id);
+public void deleteAssignment(@PathVariable int assignmentId){
+	String email = "dwisneski@csumb.edu";//hard code admin email
+	Assignment a = checkAssignment(assignmentId, email);
+		if(a.getNeedsGrading()==0) {
+			assignmentRepository.delete(a);
+		}
 
 }
 

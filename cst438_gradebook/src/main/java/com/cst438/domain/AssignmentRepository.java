@@ -19,6 +19,6 @@ public interface AssignmentRepository extends CrudRepository <Assignment, Intege
 
 @Modifying
 @Query("DELETE from Assignment a where a.id = :id")
-void deleteAssignment(int id);
+void deleteAssignment(@Param("id") int id);
 
 }
