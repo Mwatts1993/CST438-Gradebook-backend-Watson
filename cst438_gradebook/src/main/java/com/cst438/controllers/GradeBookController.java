@@ -3,6 +3,7 @@ package com.cst438.controllers;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -153,14 +154,14 @@ public class GradeBookController {
 	//add new assignment for the course. The assignment has a name and due date
 	@PostMapping("/assignment")
 	@Transactional
-	public void addNewAssignment ( @RequestParam String name, @RequestParam Date due_date, @RequestParam Course course_id){
+
+	public void addNewAssignment ( @RequestParam String name, @RequestParam Date due_date){
 		String email = "dwisneski@csumb.edu";//hard code admin email
 		if(email.equals("dwisneski@csumb.edu")){//Redundant, but just creating the logic for later
 			//create new assignment
 			Assignment a = new Assignment();
-			a.setDueDate(due_date);
 			a.setName(name);
-			a.setCourse(course_id);
+			a.setDueDate(due_date);
 			assignmentRepository.save(a);
 		}
 		else{
@@ -169,8 +170,8 @@ public class GradeBookController {
 	}
 	@GetMapping("/assignment/{assignment_id}")
 	@Transactional
-	public Assignment getAssignment(@PathVariable int assignment_id) {
-		Assignment a = assignmentRepository.findAssignmentById(assignment_id);
+	public Optional<Assignment> getAssignment(@PathVariable int assignment_id) {
+		Optional<Assignment> a = assignmentRepository.findById(assignment_id);
 
 		return a;
 	}
@@ -198,9 +199,7 @@ public void deleteAssignment(@PathVariable int assignment_id){
 		if(a.getNeedsGrading()==0) {
 			assignmentRepository.delete(a);
 		}
-		else{
-			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not Authorized for this action. ");
-		}
+
 }
 
 	private Assignment checkAssignment(int assignmentId, String email) {
