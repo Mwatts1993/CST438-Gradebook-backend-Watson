@@ -343,7 +343,7 @@ public class JunitTestGradebook {
 		// end of mock data
 
 		// then do an http get request for assignment 1
-		response = mvc.perform(MockMvcRequestBuilders.get("/assignment/1?name=test").accept(MediaType.APPLICATION_JSON))
+		response = mvc.perform(MockMvcRequestBuilders.put("/assignment/1?name=test").accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse();
 
 		// verify return data with entry for one student without no score
