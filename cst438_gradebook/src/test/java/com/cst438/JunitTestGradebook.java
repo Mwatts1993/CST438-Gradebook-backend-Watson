@@ -291,7 +291,7 @@ public class JunitTestGradebook {
 		response = mvc.perform(MockMvcRequestBuilders.post("/assignment/1").accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
 
 		// verify that return status = OK (value 200)
-		assertEquals(400, response.getStatus());
+		assertEquals(200, response.getStatus());
 
 		// verify that assignment was added
 
