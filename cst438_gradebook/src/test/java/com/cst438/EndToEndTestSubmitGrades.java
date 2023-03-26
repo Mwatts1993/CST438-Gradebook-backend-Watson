@@ -109,6 +109,7 @@ public class EndToEndTestSubmitGrades {
 
 		System.setProperty("webdriver.chrome.driver", CHROME_DRIVER_FILE_LOCATION);
 		WebDriver driver = new ChromeDriver();
+
 		// Puts an Implicit wait for 10 seconds before throwing exception
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 

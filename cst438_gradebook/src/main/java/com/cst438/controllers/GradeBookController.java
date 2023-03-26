@@ -1,9 +1,7 @@
 package com.cst438.controllers;
-
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -140,7 +138,7 @@ public class GradeBookController {
 		
 		for (GradebookDTO.Grade g : gradebook.grades) {
 			System.out.printf("%s\n", g.toString());
-			AssignmentGrade ag = assignmentGradeRepository.findById(g.assignmentGradeId).orElse(null);
+			AssignmentGrade ag = assignmentGradeRepository.findById(g.assignmentGradeId);
 			if (ag == null) {
 				throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Invalid grade primary key. "+g.assignmentGradeId);
 			}
@@ -155,13 +153,14 @@ public class GradeBookController {
 	@PostMapping("/assignment")
 	@Transactional
 
-	public void addNewAssignment ( @RequestParam String name, @RequestParam Date due_date){
+	public void addNewAssignment ( @RequestParam String name, @RequestParam(required = false) Date due_date, @RequestParam(required = false) Course courseID){
 		String email = "dwisneski@csumb.edu";//hard code admin email
 		if(email.equals("dwisneski@csumb.edu")){//Redundant, but just creating the logic for later
 			//create new assignment
 			Assignment a = new Assignment();
 			a.setName(name);
 			a.setDueDate(due_date);
+			a.setCourse(courseID);
 			assignmentRepository.save(a);
 		}
 		else{
@@ -170,8 +169,8 @@ public class GradeBookController {
 	}
 	@GetMapping("/assignment/{assignment_id}")
 	@Transactional
-	public Optional<Assignment> getAssignment(@PathVariable int assignment_id) {
-		Optional<Assignment> a = assignmentRepository.findById(assignment_id);
+	public Assignment getAssignment(@PathVariable int assignment_id) {
+		Assignment a = assignmentRepository.findById(assignment_id);
 
 		return a;
 	}
@@ -203,8 +202,8 @@ public void deleteAssignment(@PathVariable int assignment_id){
 }
 
 	private Assignment checkAssignment(int assignmentId, String email) {
-		// get assignment 
-		Assignment assignment = assignmentRepository.findAssignmentById(assignmentId);
+		// get assignment
+		Assignment assignment = assignmentRepository.findById(assignmentId);
 		if (assignment == null) {
 			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Assignment not found. "+assignmentId );
 		}
