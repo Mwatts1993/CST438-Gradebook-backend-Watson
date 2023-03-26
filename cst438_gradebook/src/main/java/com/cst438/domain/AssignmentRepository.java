@@ -10,15 +10,16 @@ import org.springframework.data.repository.query.Param;
 public interface AssignmentRepository extends CrudRepository <Assignment, Integer> {
 
 	@Query("select a from Assignment a where a.id = :id")
-	Assignment findAssignmentById(int id);
+	Assignment findById(int id);
+
 
 	@Query("select a from Assignment a where a.needsGrading=1 and a.dueDate < current_date and a.course.instructor= :email order by a.id")
-	List<Assignment> findNeedGradingByEmail(@Param("email") String email);
-	@SuppressWarnings("unchecked")
-	Assignment save(Assignment s);
+	List<Assignment> findNeedGradingByEmail(String email);
+}
 
-@Modifying
+
+/*	@Modifying
 @Query("DELETE from Assignment a where a.id = :id")
 void deleteAssignment(@Param("id") int id);
 
-}
+}*/

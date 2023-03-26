@@ -26,25 +26,25 @@ import com.cst438.services.RegistrationService;
 @RestController
 @CrossOrigin(origins = {"http://localhost:3000","http://localhost:3001"})
 public class GradeBookController {
-	
+
 	@Autowired
 	AssignmentRepository assignmentRepository;
-	
+
 	@Autowired
 	AssignmentGradeRepository assignmentGradeRepository;
-	
+
 	@Autowired
 	CourseRepository courseRepository;
-	
+
 	@Autowired
 	RegistrationService registrationService;
-	
+
 	// get assignments for an instructor that need grading
 	@GetMapping("/gradebook")
 	public AssignmentListDTO getAssignmentsNeedGrading( ) {
-		
-		String email = "dwisneski@csumb.edu";  // user name (should be instructor's email) 
-		
+
+		String email = "dwisneski@csumb.edu";  // user name (should be instructor's email)
+
 		List<Assignment> assignments = assignmentRepository.findNeedGradingByEmail(email);
 		AssignmentListDTO result = new AssignmentListDTO();
 		for (Assignment a: assignments) {
@@ -52,15 +52,15 @@ public class GradeBookController {
 		}
 		return result;
 	}
-	
+
 	@GetMapping("/gradebook/{id}")
 	public GradebookDTO getGradebook(@PathVariable("id") Integer assignmentId  ) {
-		
-		String email = "dwisneski@csumb.edu";  // user name (should be instructor's email) 
+
+		String email = "dwisneski@csumb.edu";  // user name (should be instructor's email)
 		Assignment assignment = checkAssignment(assignmentId, email);
-		
+
 		// get the enrollment for the course
-		//  for each student, get the current grade for assignment, 
+		//  for each student, get the current grade for assignment,
 		//   if the student does not have a current grade, create an empty grade
 		GradebookDTO gradebook = new GradebookDTO();
 		gradebook.assignmentId= assignmentId;
@@ -84,20 +84,20 @@ public class GradeBookController {
 		}
 		return gradebook;
 	}
-	
+
 	@PostMapping("/course/{course_id}/finalgrades")
 	@Transactional
 	public void calcFinalGrades(@PathVariable int course_id) {
 		System.out.println("Gradebook - calcFinalGrades for course " + course_id);
-		
-		// check that this request is from the course instructor 
-		String email = "dwisneski@csumb.edu";  // user name (should be instructor's email) 
-		
+
+		// check that this request is from the course instructor
+		String email = "dwisneski@csumb.edu";  // user name (should be instructor's email)
+
 		Course c = courseRepository.findById(course_id).orElse(null);
 		if (!c.getInstructor().equals(email)) {
 			throw new ResponseStatusException( HttpStatus.UNAUTHORIZED, "Not Authorized. " );
 		}
-		
+
 		CourseDTOG cdto = new CourseDTOG();
 		cdto.course_id = course_id;
 		cdto.grades = new ArrayList<>();
@@ -116,10 +116,10 @@ public class GradeBookController {
 			cdto.grades.add(gdto);
 			System.out.println("Course="+course_id+" Student="+e.getStudentEmail()+" grade="+gdto.grade);
 		}
-		
+
 		registrationService.sendFinalGrades(course_id, cdto);
 	}
-	
+
 	private String letterGrade(double grade) {
 		if (grade >= 90) return "A";
 		if (grade >= 80) return "B";
@@ -127,41 +127,42 @@ public class GradeBookController {
 		if (grade >= 60) return "D";
 		return "F";
 	}
-	
+
 	@PutMapping("/gradebook/{id}")
 	@Transactional
 	public void updateGradebook (@RequestBody GradebookDTO gradebook, @PathVariable("id") Integer assignmentId ) {
-		
-		String email = "dwisneski@csumb.edu";  // user name (should be instructor's email) 
+
+		String email = "dwisneski@csumb.edu";  // user name (should be instructor's email)
 		checkAssignment(assignmentId, email);  // check that user name matches instructor email of the course.
-		
-		// for each grade in gradebook, update the assignment grade in database 
+
+		// for each grade in gradebook, update the assignment grade in database
 		System.out.printf("%d %s %d\n",  gradebook.assignmentId, gradebook.assignmentName, gradebook.grades.size());
-		
+
 		for (GradebookDTO.Grade g : gradebook.grades) {
 			System.out.printf("%s\n", g.toString());
-			AssignmentGrade ag = assignmentGradeRepository.findById(g.assignmentGradeId).orElse(null);
+			AssignmentGrade ag = assignmentGradeRepository.findById(g.assignmentGradeId);
 			if (ag == null) {
 				throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Invalid grade primary key. "+g.assignmentGradeId);
 			}
 			ag.setScore(g.grade);
 			System.out.printf("%s\n", ag.toString());
-			
+
 			assignmentGradeRepository.save(ag);
 		}
-		
+
 	}
 	//add new assignment for the course. The assignment has a name and due date
 	@PostMapping("/assignment")
 	@Transactional
 
-	public void addNewAssignment ( @RequestParam String name, @RequestParam Date due_date){
+	public void addNewAssignment ( @RequestParam String name, @RequestParam(required = false) Date due_date, @RequestParam(required = false) Course courseID){
 		String email = "dwisneski@csumb.edu";//hard code admin email
 		if(email.equals("dwisneski@csumb.edu")){//Redundant, but just creating the logic for later
 			//create new assignment
 			Assignment a = new Assignment();
 			a.setName(name);
 			a.setDueDate(due_date);
+			a.setCourse(courseID);
 			assignmentRepository.save(a);
 		}
 		else{
@@ -170,8 +171,8 @@ public class GradeBookController {
 	}
 	@GetMapping("/assignment/{assignment_id}")
 	@Transactional
-	public Optional<Assignment> getAssignment(@PathVariable int assignment_id) {
-		Optional<Assignment> a = assignmentRepository.findById(assignment_id);
+	public Assignment getAssignment(@PathVariable int assignment_id) {
+		Assignment a = assignmentRepository.findById(assignment_id);
 
 		return a;
 	}
@@ -203,8 +204,8 @@ public void deleteAssignment(@PathVariable int assignment_id){
 }
 
 	private Assignment checkAssignment(int assignmentId, String email) {
-		// get assignment 
-		Assignment assignment = assignmentRepository.findAssignmentById(assignmentId);
+		// get assignment
+		Assignment assignment = assignmentRepository.findById(assignmentId);
 		if (assignment == null) {
 			throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Assignment not found. "+assignmentId );
 		}
@@ -212,7 +213,7 @@ public void deleteAssignment(@PathVariable int assignment_id){
 		if (!assignment.getCourse().getInstructor().equals(email)) {
 			throw new ResponseStatusException( HttpStatus.UNAUTHORIZED, "Not Authorized. " );
 		}
-		
+
 		return assignment;
 	}
 
