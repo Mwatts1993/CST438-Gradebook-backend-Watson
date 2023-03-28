@@ -112,7 +112,9 @@ public class JunitTestGradebook {
 		ag.setStudentEnrollment(enrollment);
 
 		// given -- stubs for database repositories that return test data
+
 		given(assignmentRepository.findById(1)).willReturn(assignment);
+
 		given(assignmentGradeRepository.findByAssignmentIdAndStudentEmail(1, TEST_STUDENT_EMAIL)).willReturn(null);
 		given(assignmentGradeRepository.save(any())).willReturn(ag);
 
@@ -280,15 +282,19 @@ public class JunitTestGradebook {
 		ag.setStudentEnrollment(enrollment);
 
 		// given -- stubs for database repositories that return test data
+
 		given(assignmentRepository.findById(1)).willReturn(assignment);
 		given(assignmentGradeRepository.findByAssignmentIdAndStudentEmail(1, TEST_STUDENT_EMAIL)).willReturn(null);
 		given(assignmentGradeRepository.save(any())).willReturn(ag);
 		given(courseRepository.findByCourse_id(40442)).willReturn(course);
 
+
 		// end of mock data
 
 		//create a new assignment
+
 		response = mvc.perform(MockMvcRequestBuilders.post("/assignment?name=Test&dueDate=2021-09-01").accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
+
 
 		// verify that return status = OK (value 200)
 		assertEquals(200, response.getStatus());
@@ -299,8 +305,10 @@ public class JunitTestGradebook {
 	}
 
 
+
 	@Test
 	public void updateAssignment() throws Exception {
+
 		MockHttpServletResponse response;
 
 		// mock database data
@@ -336,10 +344,12 @@ public class JunitTestGradebook {
 		ag.setStudentEnrollment(enrollment);
 
 		// given -- stubs for database repositories that return test data
+
 		given(assignmentRepository.findById(1)).willReturn(assignment);
 		given(assignmentGradeRepository.findByAssignmentIdAndStudentEmail(1, TEST_STUDENT_EMAIL)).willReturn(ag);
 		given(assignmentGradeRepository.findById(1)).willReturn(ag);
 		given(courseRepository.findByCourse_id(1)).willReturn(course);
+
 
 		// end of mock data
 
@@ -352,11 +362,13 @@ public class JunitTestGradebook {
 
 		// verify that a save was NOT called on repository because student already has a
 		// grade
+
 		verify(assignmentRepository, times(1)).save(any());
 
 	}
 
 	@Test
+
 	public void deleteAssignment() throws Exception {
 
 		MockHttpServletResponse response;
@@ -387,6 +399,7 @@ public class JunitTestGradebook {
 		assignment.setName("Assignment 1");
 		assignment.setNeedsGrading(0);
 
+
 		// given -- stubs for database repositories that return test data
 		given(assignmentRepository.findById(1)).willReturn(assignment);
 		given(assignmentGradeRepository.findByAssignmentIdAndStudentEmail(1, TEST_STUDENT_EMAIL)).willReturn(null);
@@ -400,6 +413,7 @@ public class JunitTestGradebook {
 
 		// verify that return status = OK (value 200)
 		assertEquals(200, response.getStatus());
+
 
 	}
 
