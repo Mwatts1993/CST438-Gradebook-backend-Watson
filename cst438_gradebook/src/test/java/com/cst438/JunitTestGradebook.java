@@ -33,14 +33,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.test.context.ContextConfiguration;
 
-/* 
+/*
  * Example of using Junit with Mockito for mock objects
  *  the database repositories are mocked with test data.
- *  
+ *
  * Mockmvc is used to test a simulated REST call to the RestController
- * 
+ *
  * the http response and repository is verified.
- * 
+ *
  *   Note: This tests uses Junit 5.
  *  ContextConfiguration identifies the controller class to be tested
  *  addFilters=false turns off security.  (I could not get security to work in test environment.)
@@ -51,7 +51,7 @@ import org.springframework.test.context.ContextConfiguration;
 @WebMvcTest
 public class JunitTestGradebook {
 
-	static final String URL = "http://localhost:8080";
+	static final String URL = "http://localhost:8081";
 	public static final int TEST_COURSE_ID = 40442;
 	public static final String TEST_STUDENT_EMAIL = "test@csumb.edu";
 	public static final String TEST_STUDENT_NAME = "test";
@@ -304,7 +304,9 @@ public class JunitTestGradebook {
 		verify(assignmentRepository, times(1)).save(any());
 	}
 
-	 @Test
+
+
+	@Test
 	public void updateAssignment() throws Exception {
 
 		MockHttpServletResponse response;
@@ -360,7 +362,9 @@ public class JunitTestGradebook {
 
 		// verify that a save was NOT called on repository because student already has a
 		// grade
-		verify(assignmentGradeRepository, times(1)).save(any());
+
+		verify(assignmentRepository, times(1)).save(any());
+
 	}
 
 	@Test
@@ -395,11 +399,6 @@ public class JunitTestGradebook {
 		assignment.setName("Assignment 1");
 		assignment.setNeedsGrading(0);
 
-		AssignmentGrade ag = new AssignmentGrade();
-		ag.setAssignment(assignment);
-		ag.setId(1);
-		ag.setScore("80");
-		ag.setStudentEnrollment(enrollment);
 
 		// given -- stubs for database repositories that return test data
 		given(assignmentRepository.findById(1)).willReturn(assignment);
@@ -407,11 +406,12 @@ public class JunitTestGradebook {
 
 		// end of mock data
 
-		// then do an http get request for assignment 1
-		response = mvc.perform(MockMvcRequestBuilders.get("/assignment/1").accept(MediaType.APPLICATION_JSON))
+		// send updates to server
+		response = mvc
+				.perform(MockMvcRequestBuilders.delete("/assignment/1"))
 				.andReturn().getResponse();
 
-		// verify return data with entry for one student without no score
+		// verify that return status = OK (value 200)
 		assertEquals(200, response.getStatus());
 
 

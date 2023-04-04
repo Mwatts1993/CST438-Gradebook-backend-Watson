@@ -44,6 +44,7 @@ public class RegistrationServiceMQ extends RegistrationService {
 	@RabbitListener(queues = "gradebook-queue")
 	@Transactional
 	public void receive(EnrollmentDTO enrollmentDTO) {
+
 		
 		//TODO  complete this method in homework 4
 		Course course = courseRepository.findById(enrollmentDTO.course_id).get();
@@ -61,6 +62,7 @@ public class RegistrationServiceMQ extends RegistrationService {
 
 		enrollmentDTO.id = enrollment.getId();
 		System.out.println("Enrollment added: " + enrollmentDTO);
+
 	}
 
 	// sender of messages to Registration Service
@@ -72,5 +74,7 @@ public class RegistrationServiceMQ extends RegistrationService {
 		System.out.println("Sending Grades for: " + courseDTO);
 
 	}
+		
+
 
 }
