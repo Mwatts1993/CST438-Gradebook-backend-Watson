@@ -5,7 +5,6 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cst438.domain.Course;
@@ -73,4 +72,5 @@ public class RegistrationServiceMQ extends RegistrationService {
 		System.out.println("Sending Grades for: " + courseDTO);
 
 	}
+
 }
