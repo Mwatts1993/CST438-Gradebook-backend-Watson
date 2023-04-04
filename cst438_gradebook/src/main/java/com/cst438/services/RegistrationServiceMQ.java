@@ -13,6 +13,7 @@ import com.cst438.domain.CourseRepository;
 import com.cst438.domain.Enrollment;
 import com.cst438.domain.EnrollmentDTO;
 import com.cst438.domain.EnrollmentRepository;
+import org.springframework.web.server.ResponseStatusException;
 
 
 public class RegistrationServiceMQ extends RegistrationService {
@@ -44,15 +45,24 @@ public class RegistrationServiceMQ extends RegistrationService {
 	@Transactional
 	public void receive(EnrollmentDTO enrollmentDTO) {
 
-		Course course  = courseRepository.findByCourse_id(enrollmentDTO.course_id);
-		Enrollment enrollment = new Enrollment();
+		
+		//TODO  complete this method in homework 4
+		Course course = courseRepository.findById(enrollmentDTO.course_id).get();
+		if(course==null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Course id not found.");
+		}
 
-		enrollment.setCourse(course);
+		Enrollment enrollment = new Enrollment();
 		enrollment.setStudentEmail(enrollmentDTO.studentEmail);
 		enrollment.setStudentName(enrollmentDTO.studentName);
+		enrollment.setCourse(course);
 
-		enrollmentRepository.save(enrollment);
-		
+
+		enrollment = enrollmentRepository.save(enrollment);
+
+		enrollmentDTO.id = enrollment.getId();
+		System.out.println("Enrollment added: " + enrollmentDTO);
+
 	}
 
 	// sender of messages to Registration Service
